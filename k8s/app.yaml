@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: vn-app
-          image: hauet2017/vn:latest
+          image: hauet2017/vn:ceb849b1fd72cb3c213eeb2ff1758131583a406a
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
