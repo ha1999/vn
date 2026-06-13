@@ -8,6 +8,8 @@
 |---|---|---|
 | Register | Create a new user account with USER role | Done |
 | Login | Authenticate with username/email and password, receive JWT | Done |
+| Logout | Log user logout event to `login_logs` table | Done |
+| Login Audit | Log all login success/failure events with IP and user-agent | Done |
 | Refresh Token | Exchange a refresh token for a new access token | Done |
 | Get Current User | Return authenticated user's profile and permissions | Done |
 | JWT Provider (config) | Generate/validate access and refresh tokens via jjwt | Done |
