@@ -1,0 +1,8 @@
+.gradle/
+build/
+.git/
+.gitattributes
+.gitignore
+.vscode/
+HELP.md
+*.md

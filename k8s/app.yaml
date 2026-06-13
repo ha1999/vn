@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vn-app
+  namespace: vn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vn-app
+  template:
+    metadata:
+      labels:
+        app: vn-app
+    spec:
+      containers:
+        - name: vn-app
+          image: hauet2017/vn:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/vn
+            - name: SPRING_DATASOURCE_USERNAME
+              value: vn
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vn-secret
+                  key: db-password
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vn-secret
+                  key: jwt-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vn-app
+  namespace: vn
+spec:
+  selector:
+    app: vn-app
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vn-app
+  namespace: vn
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`vn.local`)
+      services:
+        - name: vn-app
+          port: 8080
