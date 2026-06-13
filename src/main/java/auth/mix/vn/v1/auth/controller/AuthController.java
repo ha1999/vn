@@ -4,6 +4,7 @@ import auth.mix.vn.v1.auth.dto.*;
 import auth.mix.vn.v1.auth.service.AuthService;
 
 import auth.mix.vn.v1.user.dto.UserResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponseDto> login(@Valid @RequestBody LoginRequestDto request) {
-        JwtResponseDto response = authService.login(request);
+    public ResponseEntity<JwtResponseDto> login(@Valid @RequestBody LoginRequestDto request,
+                                                HttpServletRequest httpRequest) {
+        JwtResponseDto response = authService.login(request, httpRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -34,6 +36,13 @@ public class AuthController {
     public ResponseEntity<JwtResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
         JwtResponseDto response = authService.refresh(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                       HttpServletRequest httpRequest) {
+        authService.logout(userDetails.getId(), httpRequest);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

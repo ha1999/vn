@@ -61,6 +61,7 @@ public class DataInitializer implements CommandLineRunner {
         Permission permissionCreatePermission = createPermission(PermissionName.PERMISSION_CREATE);
         Permission permissionWritePermission = createPermission(PermissionName.PERMISSION_WRITE);
         Permission permissionDisablePermission = createPermission(PermissionName.PERMISSION_DISABLE);
+        Permission authLogoutPermission = createPermission(PermissionName.AUTH_LOGOUT);
 
         Role adminRole = createRole(RoleName.ADMIN.name(), "Full system access",
                 userReadPermission, userCreatePermission, userWritePermission, userDeletePermission,
@@ -68,7 +69,7 @@ public class DataInitializer implements CommandLineRunner {
                 adminAccessPermission, endpointPermissionRead, endpointPermissionWrite,
                 userDisablePermission, roleDisablePermission,
                 permissionReadPermission, permissionCreatePermission, permissionWritePermission,
-                permissionDisablePermission);
+                permissionDisablePermission, authLogoutPermission);
 
         createRole(RoleName.MODERATOR.name(), "Can manage users and view roles",
                 userReadPermission, userCreatePermission, userWritePermission,
@@ -119,6 +120,8 @@ public class DataInitializer implements CommandLineRunner {
 
         createEndpointRule("GET", "/api/endpoint-permissions", PermissionName.ENDPOINT_PERMISSION_READ, true);
         createEndpointRule("PUT", "/api/endpoint-permissions/{id}", PermissionName.ENDPOINT_PERMISSION_WRITE, true);
+
+        createEndpointRule("POST", "/api/auth/logout", PermissionName.AUTH_LOGOUT, true);
 
         pathMatcherService.reload();
         log.info("Seeding complete");

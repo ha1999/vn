@@ -19,6 +19,7 @@ public final class PermissionName {
     public static final String ADMIN_ACCESS = "admin:access";
     public static final String ENDPOINT_PERMISSION_READ = "endpoint-permission:read";
     public static final String ENDPOINT_PERMISSION_WRITE = "endpoint-permission:write";
+    public static final String AUTH_LOGOUT = "auth:logout";
 
     private PermissionName() {}
 }

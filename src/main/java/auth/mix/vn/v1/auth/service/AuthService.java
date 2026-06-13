@@ -4,6 +4,8 @@ import auth.mix.vn.v1.auth.dto.JwtResponseDto;
 import auth.mix.vn.v1.auth.dto.LoginRequestDto;
 import auth.mix.vn.v1.auth.dto.RefreshTokenRequestDto;
 import auth.mix.vn.v1.auth.dto.RegisterRequestDto;
+import auth.mix.vn.v1.auth.log.entity.LoginAction;
+import auth.mix.vn.v1.auth.log.service.LoginLogService;
 
 import auth.mix.vn.v1.permission.entity.Permission;
 import auth.mix.vn.v1.role.entity.Role;
@@ -13,6 +15,7 @@ import auth.mix.vn.v1.user.entity.User;
 import auth.mix.vn.v1.user.repository.UserRepository;
 import auth.mix.vn.v1.user.dto.UserResponseDto;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +35,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final LoginLogService loginLogService;
 
     @Transactional
     public JwtResponseDto register(RegisterRequestDto request) {
@@ -59,20 +63,35 @@ public class AuthService {
         return buildJwtResponse(user);
     }
 
-    public JwtResponseDto login(LoginRequestDto request) {
+    @Transactional
+    public JwtResponseDto login(LoginRequestDto request, HttpServletRequest httpRequest) {
         User user = userRepository.findByUsername(request.getUsernameOrEmail())
                 .or(() -> userRepository.findByEmail(request.getUsernameOrEmail()))
-                .orElseThrow(() -> new BadCredentialsException("Invalid username/email or password"));
+                .orElseThrow(() -> {
+                    loginLogService.log(null, LoginAction.LOGIN_FAILED, httpRequest,
+                            "User not found: " + request.getUsernameOrEmail());
+                    return new BadCredentialsException("Invalid username/email or password");
+                });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            loginLogService.log(user.getId(), LoginAction.LOGIN_FAILED, httpRequest,
+                    "Invalid password");
             throw new BadCredentialsException("Invalid username/email or password");
         }
 
         if (!user.isEnabled()) {
-            throw new BadCredentialsException("Account is disabled");
+            loginLogService.log(user.getId(), LoginAction.LOGIN_FAILED, httpRequest,
+                    "Account disabled");
+            throw new BadCredentialsException("Invalid username/email or password");
         }
 
+        loginLogService.log(user.getId(), LoginAction.LOGIN_SUCCESS, httpRequest, null);
         return buildJwtResponse(user);
+    }
+
+    @Transactional
+    public void logout(UUID userId, HttpServletRequest httpRequest) {
+        loginLogService.log(userId, LoginAction.LOGOUT, httpRequest, null);
     }
 
     public JwtResponseDto refresh(RefreshTokenRequestDto request) {
